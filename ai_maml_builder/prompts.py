@@ -79,45 +79,6 @@ def prompt_process_step_output(content: str, process_step_analyzed, next_process
         unit=response_json.get("output_unit"),
     )
 
-def prompt_process_novelty_parameters(content: str, process_step_analyzed):
-    print(f"[prompt_process_novelty_parameters] {process_step_analyzed.type}")
-    response = openai_client.chat.completions.create(
-        model="gpt-4-turbo-preview",
-        response_format={ "type": "json_object" },
-        messages=[
-            { "role": "system", "content": """You are an assistant trained in biochemical process engineering. Provide a JSON response, within {{ 'parameter_name': str, 'parameter_unit': str }}""" },
-            {
-                "role": "user",
-                "content": f"""
-                As we buid out a simple technoeconomic model, we need a critical parameter that can be adjusted determining efficiency of the process step '{process_step_analyzed.type}'. Choose one for our model.
-                If not specified, determine a sensible default which can be used in a technoecnomic model analysis.
-
-                For example,
-                - moisture_content, weight_percentage
-                - conversion_rate, %
-                - distillation_extraction_rate, %
-
-                ---
-
-                Manufacturing Text/Markup:
-
-                {content}
-
-                ---
-
-                Response:
-                """
-            },
-        ],
-        max_tokens=2000)
-    response_text = response.choices[0].message.content
-    response_json = json.loads(response_text)
-    print(f"[prompt_process_novelty_parameters] {process_step_analyzed.type} -> ", response_json)
-    return dict(
-        name=response_json.get("parameter_name"),
-        unit=response_json.get("parameter_unit"),
-    )
-
 def prompt_simple_response(content: str, prompt: str):
     print(f"[prompt_simple_response] {prompt}")
     response = openai_client.chat.completions.create(
